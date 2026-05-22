@@ -18,7 +18,7 @@ class db_ingestion():
         print(embedding_api_key)
         if not embedding_api_key:
             raise Exception("embeddings api key not found")
-        self.client = MongoClient(db_credentials, ServerSelectionTimeoutError=2000)
+        self.client = MongoClient(db_credentials)
         
     def check_mongodb_connection(self):
         try:
