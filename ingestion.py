@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 import os
 from pymongo import MongoClient
-from pymongo.errors import ServerSelectionTimeoutError
+from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
+import fitz
 load_dotenv()
 
 
@@ -18,7 +19,7 @@ class db_ingestion():
         print(embedding_api_key)
         if not embedding_api_key:
             raise Exception("embeddings api key not found")
-        self.client = MongoClient(db_credentials)
+        self.client = MongoClient(db_credentials, serverSelectionTimeoutMS=2000)
         
     def check_mongodb_connection(self):
         try:
@@ -27,10 +28,28 @@ class db_ingestion():
         except ServerSelectionTimeoutError as e:
             print("❌ Connection Failed! Could not connect to MongoDB server.")
             print(f"Error details: {e}")   
+        except PyMongoError as e:
+            print(f"an mongoDB error occured: {e}")
         except Exception as e:
             print(f"an unexcepted error occured: {e}")
         finally:
             self.client.close()    
+        
+        
+    def pdf_loader(file):
+        doc = fitz.open(file)
+        text = ''
+        for page in doc:
+            text+=page.get_text()
+            
+        paragraph = text.split("\n\n")
+        cleaned_paragraph = []
+        for p in paragraph:
+            if p.strip():
+                cleaned_paragraph.append(p.strip())
+        paragraphs = cleaned_paragraph
+        return paragraphs
+        
         
         
           
