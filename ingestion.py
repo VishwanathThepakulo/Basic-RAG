@@ -70,13 +70,18 @@ class db_ingestion():
             chunk_overlap = 200,
             separators=["\n\n", "\n", " ", ""], 
         )
-        chunks = text_splitter.split_text(text)
+        documents = text_splitter.split_documents(data)
+        texts = []
+        metadatas = []
+        for doc in documents:
+            texts.append(doc.page_content)  
+            metadatas.append(doc.metadata)
         # print(f"====================================\n\n{chunks}\n\n=====================================================")
         # for chunk in chunks:
         #     print(chunk)
         #     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         #     print()
-        self.Create_Embeddings(chunks)
+        self.Create_Embeddings(texts)
         return chunks
     
     def Create_Embeddings(self, chunks):
