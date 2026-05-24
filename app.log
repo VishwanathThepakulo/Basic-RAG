@@ -1,0 +1,7 @@
+2026-05-24 20:18:41,305 - httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2?expand=inferenceProviderMapping "HTTP/1.1 200 OK"
+2026-05-24 20:18:41,534 - httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2 "HTTP/1.1 200 OK"
+2026-05-24 20:18:42,439 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction "HTTP/1.1 200 OK"
+2026-05-24 20:19:56,673 - httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2?expand=inferenceProviderMapping "HTTP/1.1 200 OK"
+2026-05-24 20:19:56,908 - httpx - INFO - HTTP Request: GET https://huggingface.co/api/models/sentence-transformers/all-MiniLM-L6-v2 "HTTP/1.1 200 OK"
+2026-05-24 20:19:57,472 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/hf-inference/models/sentence-transformers/all-MiniLM-L6-v2/pipeline/feature-extraction "HTTP/1.1 200 OK"
+2026-05-24 20:20:03,111 - ingestion - INFO - Successfully generated embeddings

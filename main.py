@@ -1,18 +1,35 @@
 from ingestion import db_ingestion
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+dbIngestion = db_ingestion()
+
+
+app = FastAPI()
+class validate_uploading_pdf(BaseModel):
+    path:str
 
 
 
 
 
-
-def main():
-    print("Hello from basic-rag!")
-    user_pdf_input = input("Enter a pdf path : ")
-    user_pdf_output = db_ingestion.pdf_loader(user_pdf_input)
-    for para in user_pdf_output:
-        print("PARAGRAPH:")
-        print(para)
-        print("="*50)
+@app.post('/document/ingestion/intoDB')
+def db_ingestion_endpoint(uploading_path : validate_uploading_pdf):
+    # user_pdf_input = input("Enter a pdf path : ")
+    
+    user_pdf_output = dbIngestion.pdf_loader(uploading_path.path)
+    # for para in user_pdf_output:
+    #     print("PARAGRAPH:")
+    #     print(para)
+    #     print("="*50)
+    # print(user_pdf_output)
+    return {"status": 200, 'length':len(user_pdf_output)}
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+    uvicorn.run(
+        "main:app",              
+        host='localhost',
+        port=9000
+        # reload=True             
+    )
