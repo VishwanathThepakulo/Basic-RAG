@@ -4,6 +4,8 @@ from pymongo import MongoClient
 from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
+from langchain_core.documents import Document
+
 import fitz
 import logging
 import re
@@ -29,6 +31,7 @@ class db_ingestion():
         if not embedding_api_key:
             raise Exception("embeddings api key not found")
         self.client = MongoClient(db_credentials, serverSelectionTimeoutMS=2000)
+        self.collection = self.client['RAG_Collection']['Searchable_TABLE']
         self.embedding_model = HuggingFaceEndpointEmbeddings(
             model="sentence-transformers/all-MiniLM-L6-v2",
             huggingfacehub_api_token=embedding_api_key,
@@ -61,40 +64,74 @@ class db_ingestion():
         #     if p.strip():
         #         cleaned_paragraph.append(p.strip())
         # paragraphs = cleaned_paragraph
-        self.chunking(text)
-        return text
+        doc = Document(
+            page_content=text,
+            metadata={
+                'source':file
+            }
+        )
+        self.chunking(doc)
+        return doc
     
     def chunking(self, text):
         text_splitter = RecursiveCharacterTextSplitter(
             chunk_size = 1000,
             chunk_overlap = 200,
             separators=["\n\n", "\n", " ", ""], 
+            add_start_index=True,
         )
-        documents = text_splitter.split_documents(data)
+        documents = text_splitter.split_documents([text])
+        
         texts = []
         metadatas = []
         for doc in documents:
+            # texts.append(doc)
             texts.append(doc.page_content)  
             metadatas.append(doc.metadata)
+        # for metadata in metadatas:
+        #     print(metadata)
+        #     print()
+        #     print("---------------------------------------------")
+        #     print()
         # print(f"====================================\n\n{chunks}\n\n=====================================================")
         # for chunk in chunks:
         #     print(chunk)
         #     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
         #     print()
-        self.Create_Embeddings(texts)
-        return chunks
+        self.Create_Embeddings(texts,metadatas)
+        return {
+            'texts':texts,
+            'metadatas':metadatas
+        }
     
-    def Create_Embeddings(self, chunks):
+    def Create_Embeddings(self, chunks, metadatas):
         embeddings = self.embedding_model.embed_documents(chunks)
         logger.info("Successfully generated embeddings")
-        print(embeddings)
+        # print(embeddings)
+        docs_to_insert = []
+        for text, meta, embd in zip(chunks, metadatas, embeddings):
+            items = {
+                "text":text,
+                'embeddings':embd,
+                **meta
+            }
+            docs_to_insert.append(items)
+        self.Store_in_Vector_DB(docs_to_insert)
         return {
             "status":200,
             "embeddings": embeddings
         }
+        
     
-    def Store_in_Vector_DB():
-        pass
+    
+    def Store_in_Vector_DB(self, docs_to_insert):
+        result = self.collection.insert_many(docs_to_insert)
+        print(f"inserted_count:{len(result.inserted_ids)}")
+        return {
+            'status':200,
+            "inserted_count":len(result.inserted_ids)
+        }
+        
     def Similarity_Search():
         pass
     

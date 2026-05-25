@@ -23,7 +23,7 @@ def db_ingestion_endpoint(uploading_path : validate_uploading_pdf):
     #     print(para)
     #     print("="*50)
     # print(user_pdf_output)
-    return {"status": 200, 'length':len(user_pdf_output)}
+    return {"status": 200, 'length':user_pdf_output}
 
 if __name__ == "__main__":
     import uvicorn
