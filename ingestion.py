@@ -5,7 +5,7 @@ from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_core.documents import Document
-
+import uuid 
 import fitz
 import logging
 import re
@@ -40,9 +40,9 @@ class db_ingestion():
     def check_mongodb_connection(self):
         try:
             self.client.admin.command('ping')
-            print("✅ Success! Connected to MongoDB successfully.")
+            print("Success! Connected to MongoDB successfully.")
         except ServerSelectionTimeoutError as e:
-            print("❌ Connection Failed! Could not connect to MongoDB server.")
+            print("Connection Failed! Could not connect to MongoDB server.")
             print(f"Error details: {e}")   
         except PyMongoError as e:
             print(f"an mongoDB error occured: {e}")
@@ -52,52 +52,51 @@ class db_ingestion():
         
         
     def pdf_loader(self, file):
-        doc = fitz.open(file)
-        text = ''
-        for page in doc:
-            text+=page.get_text()
-        text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
-        text = re.sub(r'\n\s*\n', '\n\n', text)
-        # paragraph = text.split("\n\n")
-        # cleaned_paragraph = []
-        # for p in paragraph:
-        #     if p.strip():
-        #         cleaned_paragraph.append(p.strip())
-        # paragraphs = cleaned_paragraph
-        doc = Document(
-            page_content=text,
-            metadata={
-                'source':file
-            }
-        )
-        self.chunking(doc)
-        return doc
+        documents = []
+        document_id = str(uuid.uuid4())
+
+        with fitz.open(file) as pdf:
+            for page_number, page in enumerate(pdf):
+                text = page.get_text()
+
+                text = re.sub(r'(?<!\n)\n(?!\n)', ' ', text)
+                text = re.sub(r'\n\s*\n', '\n\n', text)
+                document = Document(
+                    page_content=text,
+                    metadata = {
+                        'document_id':document_id,
+                        'source':file,
+                        'page':page_number+1
+                    }
+                )
+                documents.append(document)
+        
+        self.chunking(documents) 
+        return documents
     
-    def chunking(self, text):
+    def chunking(self, documents):
+
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size = 1000,
-            chunk_overlap = 200,
+            chunk_size = 500,
+            chunk_overlap = 100,
             separators=["\n\n", "\n", " ", ""], 
             add_start_index=True,
         )
-        documents = text_splitter.split_documents([text])
-        
+        split_docs = text_splitter.split_documents(documents)
+
         texts = []
         metadatas = []
-        for doc in documents:
-            # texts.append(doc)
+
+        for chunk_index, doc in enumerate(split_docs):
+            
+            
+            doc.metadata['chunk_id']=(f"{doc.metadata['document_id']}__page__{doc.metadata['page']}__chunk__{chunk_index}")
+            doc.metadata["chunk_index"] = chunk_index,
+            # doc.metadata['start_index']:doc.metadata.get("start_index")
+            
             texts.append(doc.page_content)  
             metadatas.append(doc.metadata)
-        # for metadata in metadatas:
-        #     print(metadata)
-        #     print()
-        #     print("---------------------------------------------")
-        #     print()
-        # print(f"====================================\n\n{chunks}\n\n=====================================================")
-        # for chunk in chunks:
-        #     print(chunk)
-        #     print('++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
-        #     print()
+
         self.Create_Embeddings(texts,metadatas)
         return {
             'texts':texts,
