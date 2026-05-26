@@ -22,12 +22,10 @@ logger = logging.getLogger(__name__)
 
 class db_ingestion():
     def __init__(self):
-        db_credentials = os.getenv("DB_CREDENTIALS")
-        print(db_credentials)      
+        db_credentials = os.getenv("DB_CREDENTIALS")   
         if not db_credentials:
             raise Exception("DB credentials not found")
         embedding_api_key = os.getenv("EMBEDDING_API_KEY")
-        print(embedding_api_key)
         if not embedding_api_key:
             raise Exception("embeddings api key not found")
         self.client = MongoClient(db_credentials, serverSelectionTimeoutMS=2000)
@@ -131,6 +129,13 @@ class db_ingestion():
             "inserted_count":len(result.inserted_ids)
         }
         
+
+
+    def query_embedding(self, query):
+        query_embeddings = self.embedding_model.embed_query(query)
+        return query_embeddings
+
+
     def Similarity_Search():
         pass
     
@@ -141,6 +146,12 @@ class db_ingestion():
         self.client.close()
         
           
+
+
+
+
+
+
 if __name__=='__main__':
     dbIngestion = db_ingestion()
     dbIngestion.check_mongodb_connection()

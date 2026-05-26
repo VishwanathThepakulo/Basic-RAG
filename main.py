@@ -9,7 +9,8 @@ app = FastAPI()
 class validate_uploading_pdf(BaseModel):
     path:str
 
-
+class ValidateQuery(BaseModel):
+    query:str
 
 
 
@@ -24,6 +25,18 @@ def db_ingestion_endpoint(uploading_path : validate_uploading_pdf):
     #     print("="*50)
     # print(user_pdf_output)
     return {"status": 200, 'length':user_pdf_output}
+
+
+@app.post("/api/query")
+def user_query(query : ValidateQuery):
+    users_query_is = dbIngestion.query_embedding(query.query)
+    
+    pass
+
+
+
+
+
 
 if __name__ == "__main__":
     import uvicorn
