@@ -136,8 +136,25 @@ class db_ingestion():
         return query_embeddings
 
 
-    def Similarity_Search():
-        pass
+    def Similarity_Search(self, embedded_query):
+        pipeline = [
+            {
+                "$vectorSearch": {
+                    "index": "vector_index",
+                    "path": "embedding",
+                    "queryVector": embedded_query,
+                    "numCandidates": 100,
+                    "limit": 5
+                }
+            }
+        ]
+
+        results = self.collection.aggregate(pipeline)
+
+        for doc in results:
+            print(doc["name"])
+        return results
+
     
     def Relevant_Chunks_Retrieved():
         pass

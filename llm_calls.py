@@ -19,6 +19,33 @@ class LLMCallings():
         api_key = os.environ.get('GROQ_API_KEY')
         if not api_key:
             logger.error("error from api key initilization")
-            
+
     def query_to_llm():
         pass
+
+
+
+
+
+pipeline = [
+    {
+        "$vectorSearch": {
+            "index": "vector_index",
+            "path": "embedding",
+            "queryVector": query_embedding,
+            "numCandidates": 100,
+            "limit": 5
+        }
+    }
+]
+
+results = collection.aggregate(pipeline)
+
+for doc in results:
+    print(doc["name"])
+
+
+
+
+
+

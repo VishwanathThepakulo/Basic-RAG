@@ -30,7 +30,7 @@ def db_ingestion_endpoint(uploading_path : validate_uploading_pdf):
 @app.post("/api/query")
 def user_query(query : ValidateQuery):
     users_query_is = dbIngestion.query_embedding(query.query)
-    
+    similarity_search = dbIngestion.Similarity_Search(users_query_is)
     pass
 
 
