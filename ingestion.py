@@ -141,10 +141,10 @@ class db_ingestion():
             {
                 "$vectorSearch": {
                     "index": "vector_index",
-                    "path": "embedding",
+                    "path": "embeddings",
                     "queryVector": embedded_query,
                     "numCandidates": 100,
-                    "limit": 5
+                    "limit": 10
                 }
             }
         ]
@@ -152,7 +152,8 @@ class db_ingestion():
         results = self.collection.aggregate(pipeline)
 
         for doc in results:
-            print(doc["name"])
+            print(doc["text"])
+            print("==============================================")
         return results
 
     

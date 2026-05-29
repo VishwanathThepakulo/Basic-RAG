@@ -27,25 +27,4 @@ class LLMCallings():
 
 
 
-pipeline = [
-    {
-        "$vectorSearch": {
-            "index": "vector_index",
-            "path": "embedding",
-            "queryVector": query_embedding,
-            "numCandidates": 100,
-            "limit": 5
-        }
-    }
-]
-
-results = collection.aggregate(pipeline)
-
-for doc in results:
-    print(doc["name"])
-
-
-
-
-
 
