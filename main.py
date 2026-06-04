@@ -1,9 +1,10 @@
 from ingestion import db_ingestion
 from fastapi import FastAPI
 from pydantic import BaseModel
+from llm_calls import LLMCallings
 
 dbIngestion = db_ingestion()
-
+llm_calling = LLMCallings()
 
 app = FastAPI()
 class validate_uploading_pdf(BaseModel):
@@ -31,7 +32,11 @@ def db_ingestion_endpoint(uploading_path : validate_uploading_pdf):
 def user_query(query : ValidateQuery):
     users_query_is = dbIngestion.query_embedding(query.query)
     similarity_search = dbIngestion.Similarity_Search(users_query_is)
-    pass
+    llm_response  = llm_calling.query_to_llm(similarity_search, query.query)
+    return {
+        "status":200,
+        'similarity search result' : llm_response
+    }
 
 
 

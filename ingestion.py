@@ -148,13 +148,18 @@ class db_ingestion():
                 }
             }
         ]
-
-        results = self.collection.aggregate(pipeline)
-
-        for doc in results:
+        result = self.collection.aggregate(pipeline)
+        # results = list(self.collection.aggregate(pipeline))
+        # print("-----------------------------------------")
+        # print(results)
+        context = ''
+        for doc in result:
             print(doc["text"])
             print("==============================================")
-        return results
+            context += doc["text"] + "\n\n"
+
+        print(f"Context Length ===== {len(context)}")
+        return context
 
     
     def Relevant_Chunks_Retrieved():
