@@ -175,7 +175,13 @@ class db_ingestion():
             pairs.append([query,text])
 
         scors = self.reranker.predict(pairs)
-        pass
+        ranked = sorted(
+            zip(retrieved_docs,scors),
+            key = lambda x:x[1],
+            reverse=True
+        )
+
+        return [doc for doc, score in ranked[:top_k]]
         
     def connection_close(self):
         self.client.close()
