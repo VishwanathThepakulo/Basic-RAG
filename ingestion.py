@@ -5,6 +5,7 @@ from pymongo.errors import ServerSelectionTimeoutError, PyMongoError
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_huggingface import HuggingFaceEndpointEmbeddings
 from langchain_core.documents import Document
+from sentence_transformers import CrossEncoder
 import uuid 
 import fitz
 import logging
@@ -34,6 +35,8 @@ class db_ingestion():
             model="sentence-transformers/all-MiniLM-L6-v2",
             huggingfacehub_api_token=embedding_api_key,
         )
+        self.reranker = CrossEncoder('cross-encoder/ms-marco-MiniLM-L-12-v2')
+
         
     def check_mongodb_connection(self):
         try:
@@ -162,7 +165,16 @@ class db_ingestion():
         return context
 
     
-    def Relevant_Chunks_Retrieved():
+    def rerank_result(self, query, retrieved_docs, top_k=5):
+        texts = []
+        for doc in retrieved_docs:
+            texts.append(doc['text'])
+        
+        pairs = []
+        for text in texts:
+            pairs.append([query,text])
+
+        scors = self.reranker.predict(pairs)
         pass
         
     def connection_close(self):
