@@ -154,7 +154,7 @@ class db_ingestion():
         result = self.collection.aggregate(pipeline)
         # results = list(self.collection.aggregate(pipeline))
         # print("-----------------------------------------")
-        # print(results)
+        print(result)
         context = ''
         for doc in result:
             print(doc["text"])

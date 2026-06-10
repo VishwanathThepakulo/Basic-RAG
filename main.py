@@ -32,6 +32,7 @@ def db_ingestion_endpoint(uploading_path : validate_uploading_pdf):
 def user_query(query : ValidateQuery):
     users_query_is = dbIngestion.query_embedding(query.query)
     similarity_search = dbIngestion.Similarity_Search(users_query_is)
+    # rerank_results = dbIngestion.rerank_result(query.query, similarity_search, 5)
     llm_response  = llm_calling.query_to_llm(similarity_search, query.query)
     return {
         "status":200,
