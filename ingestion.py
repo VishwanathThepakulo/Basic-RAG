@@ -193,8 +193,9 @@ class db_ingestion():
         print(ranked)
         result = []
         for doc, score in ranked[:top_k]:
-            result.append(doc)
-
+            result.append(doc['text'])
+        print("+++++++++++++++++++++++++++++++++++++++++++++++++++++")
+        print(result)
         return result
         
     def connection_close(self):
