@@ -147,29 +147,38 @@ class db_ingestion():
                     "path": "embeddings",
                     "queryVector": embedded_query,
                     "numCandidates": 100,
-                    "limit": 10
+                    "limit": 5
                 }
             }
         ]
-        result = self.collection.aggregate(pipeline)
-        # results = list(self.collection.aggregate(pipeline))
+        
+        doc = self.collection.find_one()
+        print(len(doc["embeddings"]))
+        print(len(embedded_query))
+        # result = self.collection.aggregate(pipeline)
+        results = list(self.collection.aggregate(pipeline))
         # print("-----------------------------------------")
-        print(result)
+        # print(result)
+        # results = self.collection.find()
+        print("Retrieved Document :", len(results))
         context = ''
-        for doc in result:
-            print(doc["text"])
-            print("==============================================")
+        for doc in results:
+            # print(doc["text"])
+            # print("==============================================")
             context += doc["text"] + "\n\n"
 
         print(f"Context Length ===== {len(context)}")
-        return context
+        return results
 
     
     def rerank_result(self, query, retrieved_docs, top_k=5):
+        print(type(retrieved_docs))
+        print('///////////////////////////////////')
+        # print(retrieved_docs)
         texts = []
         for doc in retrieved_docs:
             texts.append(doc['text'])
-        
+        print(len(texts))
         pairs = []
         for text in texts:
             pairs.append([query,text])
@@ -180,8 +189,13 @@ class db_ingestion():
             key = lambda x:x[1],
             reverse=True
         )
+        print("=============================================vvvvvv================")
+        print(ranked)
+        result = []
+        for doc, score in ranked[:top_k]:
+            result.append(doc)
 
-        return [doc for doc, score in ranked[:top_k]]
+        return result
         
     def connection_close(self):
         self.client.close()
